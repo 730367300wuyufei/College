@@ -1,0 +1,37 @@
+#Implementing Market Basket Analysis using Apriori Algorithm
+# load package, first install the packages, then load them in library command.
+install.packages("dplyr")
+install.packages('plyr') 
+install.packages('arules')
+install.packages("reshape2")
+install.packages("stringi")
+library(arules) #association rules
+library(plyr)
+library(dplyr)
+library(reshape2)
+library(stringi)
+
+#read transactions. Watch out, put your local file path for groceries.csv (注意输入正确的文件路径）
+groceries <- read.transactions("~/Documents/MentorX/Basket Analysis/groceries.csv", format="basket", sep=",")
+basket_rules <- apriori(groceries, parameter = list(support = 0.002, confidence = 0.02, minlen = 2))
+#use apriori algorithm to get association rules
+
+#view rules from no.1 to no.20
+inspect(basket_rules[1:20])
+
+#convert to dataframe and view; optional
+df_basket<-as(basket_rules,"data.frame")
+
+# Mining rules for recommendations:
+# split lhs and rhs into two columns. Convert rules to character
+df_basket <- transform(df_basket, rules = colsplit(rules, pattern = " => ", names = c("lhs","rhs")))
+write.csv(df_basket, "~/Documents/df_basket.csv")
+
+#find bestsellers
+itemFrequencyPlot(groceries, topN = 15) 
+
+#plot the rules
+install.packages("arulesViz")
+library(arulesViz)
+plot(basket_rules)
+plot(basket_rules[1:10,], method="graph", control=list(type="items"))
